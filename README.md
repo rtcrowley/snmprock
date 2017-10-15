@@ -4,7 +4,7 @@ A bash script to enumerate Linux targets via SNMP. This should only be ran on **
 
 The script uses **snmpwalk**, **searchsploit** and **Nmap** to enumerate running processes. OS and Kernel enumeration is also available, along with a Community String brute force option.
 
-Searchsploit, OS and Kernel results may vary as this has only been tested on a few versions of **Debian, Ubuntu, CentOS and FreeBSD**. Use your best Judgment. Manual checks are always best if time permits.
+Searchsploit, OS and Kernel results may vary as this has only been tested on a few versions of **Debian, Ubuntu and CentOS**. Use your best Judgment. Manual checks are always best if time permits.
 
 ___
 
