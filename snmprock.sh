@@ -111,12 +111,14 @@ while getopts ':c:t:akonhb:' flag; do
         centos=$(cat snmp_tmp.txt |grep -i release |cut -c 16-18 |tr '-' '.')
         ubuntu=$(cat snmp_tmp.txt |grep -i "ubuntu-docs" |cut -c 13-17)
         debian=$(cat snmp_tmp.txt |grep -i "lsb-release" |cut -c 13-15)
+        #Added FreeBSD
         freebsd=$(echo "$os" |grep -i release |cut -d ' ' -f4 |cut -d '-' -f1)
         
         #OS string counts
         cntcen=$(cat snmp_tmp.txt |grep -c "centos")
         cntubu=$(cat snmp_tmp.txt |grep -ic "ubuntu")
         cntdeb=$(cat snmp_tmp.txt |grep -ic "debian")
+        #Added FreeBSD
         cntbsd=$(cat snmp_tmp.txt |grep -ic "bsd")
         
         echo "-----------------------------------------------------------------------"
