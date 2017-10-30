@@ -12,8 +12,8 @@ usage=$(
     echo "-b = Brute Force Community String. Only takes Target IP as argument"
     echo "-h = Help (this menu)"
     echo "------------------------------Examples---------------------------------"
-    echo "bash snmprock.sh -c private -t 127.0.0.1 -n"
-    echo "bash snmprock.sh -t 127.0.0.1 -a -o"
+    echo "bash snmprock.sh -t 127.0.0.1 -n"
+    echo "bash snmprock.sh -c private -t 127.0.0.1 -a -o"
     echo "bash snmprock.sh -b 127.0.0.1"
     echo "bash snmprock.sh -c raiden -t 127.0.0.1 -kano"
     echo "-----------------------------------------------------------------------")
