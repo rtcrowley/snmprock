@@ -1,7 +1,14 @@
 #!/bin/bash
 
+# color
+red='\033[0;31m'
+cyn='\033[0;36m'
+noco='\033[0m'
+
+br=$(echo -e ${cyn}"-----------------------------------------------------------------------"${noco})
+
 usage=$(
-    echo "--------------------------------Usage----------------------------------"
+    echo -e ${cyn}"--------------------------------Usage----------------------------------"${noco}
     echo "-c = Community String. Default is set to 'public'"
     echo "     Must be set as 1st argument if NOT default"
     echo "-t = Target IP"
@@ -11,12 +18,12 @@ usage=$(
     echo "-k = Kernel information"
     echo "-b = Brute Force Community String. Only takes Target IP as argument"
     echo "-h = Help (this menu)"
-    echo "------------------------------Examples---------------------------------"
+    echo -e ${cyn}"------------------------------Examples---------------------------------"${noco}
     echo "bash snmprock.sh -t 127.0.0.1 -n"
     echo "bash snmprock.sh -c private -t 127.0.0.1 -a -o"
     echo "bash snmprock.sh -b 127.0.0.1"
     echo "bash snmprock.sh -c raiden -t 127.0.0.1 -kano"
-    echo "-----------------------------------------------------------------------")
+    echo "$br")
 
 if [ -z "$1" ] || [[ "$1" != "-"* ]]; then
 	echo "${usage}"
@@ -25,8 +32,7 @@ fi
 
 c='public'
 
-echo "-----------------------------------------------------------------------"
-echo "------------------------------snmprock-------------------------------"
+echo -e ${cyn}"------------------------------snmprock---------------------------------"${noco}
 
 
 
@@ -36,70 +42,65 @@ while getopts ':c:t:akonhb:' flag; do
     c) c="${OPTARG}"
 	;;
     t) t="${OPTARG}"
-	echo "-----------------------------------------------------------------------"
 	echo "Community String set to: ${c}"
-	echo "-----------------------------------------------------------------------"
-	echo "Acquiring Target ${t}...."
+	echo "$br"
+	echo "Acquiring Target ${t}"
 	nmap=$(nmap -sU -p161 $t)
 	 case "$nmap" in
 	  *open*)
 	     echo "Target Acquired." 
-	     echo "Nmap shows SNMP OPEN for business"
+	     echo "Nmap shows SNMP OPEN for business."
 	     check=$(snmpwalk -v1 -c $c $t .1.3.6.1.2.1.1.1.0)
 
 	     if [ -z "$check" ]
 	     then
-		echo "-----------------------------------------------------------------------"
-		echo "---------------------snmpwalk connection FAILED------------------------"
-		echo "-------------------Double check Community String-----------------------"
-		echo "-----------------------------------------------------------------------"
+		echo -e ${red}"---------------------snmpwalk connection FAILED------------------------"${noco}
+		echo -e ${red}"-------------------Double check Community String-----------------------"${noco}
 		exit 1
 	     else
-		echo "snmpwalk connection SUCCESSFUL. Enuming now..."
+		echo "snmpwalk connection SUCCESSFUL. Enuming now."
 	     fi
 	     #Getting system resources. Saving to temp file.
 	     snmpwalk -v1 -c $c $t .1.3.6.1.2.1.25.6.3.1.2 |cut -d ':' -f2 |cut  -d '"' -f 2 >> snmp_tmp.txt
 	     if [ -s snmp_tmp.txt ]
 	     then
-		echo "Host resources captured...."
+		echo "Host resources captured."
 	     else
-		echo "--No host resources captured. SNMP on target may be limited. Exiting.--"
+		echo -e ${red}"--No host resources captured. SNMP on target may be limited. Exiting.--"${noco}
 		rm snmp_tmp.txt
-		echo "-----------------------------------------------------------------------"
+		echo "$br"
 		exit 1
 	     fi
-	     echo "-----------------------------------------------------------------------"
 	     ;;
 	   *)
-	     echo "------------------SNMP seems to be closed or filtered------------------"
+	     echo ${red}"------------------SNMP seems to be closed or filtered------------------"${noco}
 	     exit 1
 	     ;;
 	 esac
        ;;
-    a) proc=$(snmpwalk -v1 -c public $t .1.3.6.1.2.1.25.4.2.1.2 |cut -d ':' -f2 |cut  -d '"' -f2)
-	echo "-----------------------------------------------------------------------"
-	echo "------------------------Do your due diligence--------------------------"
-	echo "---------------------------ACTIVE processes----------------------------"
-	echo "-----------------Melding out host resource version intel---------------"
-	echo "-----------------------------------------------------------------------"
+    a) proc=$(snmpwalk -v1 -c $c $t .1.3.6.1.2.1.25.4.2.1.2 |cut -d ':' -f2 |cut  -d '"' -f2)
+	echo "$br"
+	echo -e ${cyn}"---------------------ACTIVE Host Resource intel------------------------"${noco}
+	echo "$br"
 	grep -r "${proc}" "snmp_tmp.txt" |sort -u
 	osinfo=$(snmpwalk -v1 -On $t -c $c .1.3.6.1.2.1.1.1.0 |cut -d ':' -f2 |cut -d '#' -f1 |cut -d '"' -f2)
-	echo "-----------------------------------------------------------------------"
        ;;
     k) sysinfo=$(snmpwalk -v1 -c $c $t 1.3.6.1.2.1.1.1 |cut -d ' ' -f4,5,6 |cut -d '"' -f2)
 	   kern=$(echo "${sysinfo}" |cut -d ' ' -f3 |cut -d '.' -f1,2)
 	   if [ -z "$kern" ]
 	   then
-    	      printf ".\n.\nNo Kernel info found\n.\nTry a manual check\n.\n"
-	   else
-		echo "--------------------------Kernel Research------------------------------"
-		echo "----------------------Searching: Kernel" "${kern}""---------------------------"
-		echo "-----------------------------------------------------------------------"
-    	        searchsploit -t kernel "${kern}" | grep -v 'windows/' | grep -v '/dos/' 
+    	      echo -e ${red}"--------------------No Kernel info found------------------------------"
+	   else   
+		echo "$br"   
+		echo -e ${cyn}"--------------------Kernel Research: Kernel" "${kern}""------------------------"${noco}
+    	        echo "$br"
+		searchsploit -t kernel "${kern}" | grep -v 'windows/' | grep -v '/dos/' 
 	   fi
 
        ;;
-    o)  echo "Testing OS.."
+    o)  echo "$br"
+	echo -e ${cyn}"------------------------------OS Recon---------------------------------"${noco}
+	echo "$br"
 	os=$(snmpwalk -v1 -c $c $t 1.3.6.1.2.1.1.1 |cut -d ' ' -f4,5,6,7 |cut -d '"' -f2)
 	centos=$(cat snmp_tmp.txt |grep -i release |cut -c 16-18 |tr '-' '.')
 	ubuntu=$(cat snmp_tmp.txt |grep -i "ubuntu-docs" |cut -c 13-17)
@@ -111,11 +112,10 @@ while getopts ':c:t:akonhb:' flag; do
 
 	cnt=("${cntdeb}" "${cntubu}" "${cntcen}")
 
-	echo "-----------------------------------------------------------------------"
 	echo "Found ${cntcen} instances of CentOS strings in host resources"
 	echo "Found ${cntdeb} instances of Debian strings in host resources"
 	echo "Found ${cntubu} instances of Ubuntu strings in host resources"
-	echo "-----------------------------------------------------------------------"
+	echo "$br"
 	echo "System Description: ${os}"
 	sysname=$(snmpwalk -v1 -c $c $t 1.3.6.1.2.1.1.5 |cut -d ' ' -f3,4 |cut -d '"' -f2)
 	echo "System Name: ${sysname}"
@@ -154,22 +154,21 @@ while getopts ':c:t:akonhb:' flag; do
 
                 ;;
 		esac
-	echo "-----------------------------------------------------------------------"
 	;;
-    n)  echo "----------Listing Aftermarket Processes (& some stock procs)-----------"
-	echo "-----------------------------------------------------------------------"
+    n)  echo "$br"
+	echo -e ${cyn}"----------Listing Aftermarket Processes (& some stock procs)-----------"${noco}
+	echo "$br"
 	proc=$(snmpwalk -v1 -c $c $t .1.3.6.1.2.1.25.4.2.1.2 |cut -d ':' -f2 |cut  -d '"' -f2)
 	#Strings that eliminante some stock procs
 	grep -r "${proc}" "snmp_tmp.txt" |sort -u |awk '!/lib/ &&! /gnome/ && !/colord/  && !/fonts/ && !/bluetooth/ \
 	&& !/indicator/ && !/unity/ && !/update/ && !/whoopsie/ && !/python3/ && !/cups/ && !/compiz/ \
 	&& !/nautilus/ && !/shotwell/ && !/bamf/ && !/lshw/ && !/session/ && !/dconf/ && !/toshset/ && !/fwupd/ \
-	&& !/shared-mime/ && !/lightdm/ && !/anacron/ && !/wbritish/ && !/upstart/ && !/bash-completion/ && !/snapd/ \ 
+	&& !/shared-mime/ && !/lightdm/ && !/anacron/ && !/wbritish/ && !/upstart/ && !/bash-completion/ && !/snapd/ \
 	&& !/zeitgeist/ && !/xorg/ && !/pulseaudio-[a-z]/ && !/python-[a-z]/ && !/gdm-user/ && !/rpm-/ && !/sysvinit/ \
 	&& !/mingetty/ && !/metacity/ && !/gnote/ && !/tracker-/ && !/gstreamer/ && !/multiarch/ && !/mime/ \
 	&& !/psutils/ && !/pm-utils/ && !/sudo-/ && !/dhclient/ && !/nss-sysin/ && !/wpa_suppli/ && !/initscripts/ \
-	&& !/dnsmasq/ && !/dbus-/ && !/systemd-/ && !/dash-/ && !/bash-/ && !/squashfs-/ && !/acpid-/  '
-	echo "-----------------------------------------------------------------------"
-       ;;
+	&& !/dnsmasq/ && !/dbus-/ && !/systemd-/ && !/dash-/ && !/bash-/ && !/squashfs-/ && !/acpid-/'
+        ;;
     h)  echo "${usage}"
 	exit 1
        ;;
@@ -188,7 +187,4 @@ if [ -f snmp_tmp.txt ]; then
    rm snmp_tmp.txt
 fi
 
-echo "-------------------------It's Judgment Day-----------------------------"
-echo "-----------------------------------------------------------------------"
-echo "-------------------------snmprock complete-----------------------------"
-echo "-----------------------------------------------------------------------"
+echo -e ${cyn}"-------------------------snmprock complete-----------------------------"${noco}
