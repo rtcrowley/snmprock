@@ -30,4 +30,4 @@ bash snmprock.sh -c raiden -t 127.0.0.1 -kano
 -----------------------------------------------------------------------
 ```
 
-Tested on host **Kali Linux 2017.2**
+Tested on host **Kali Linux 2018.2**
