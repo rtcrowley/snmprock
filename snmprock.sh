@@ -73,7 +73,7 @@ while getopts ':c:t:akonhb:' flag; do
 	     fi
 	     ;;
 	   *)
-	     echo ${red}"------------------SNMP seems to be closed or filtered------------------"${noco}
+	     echo -e ${red}"------------------SNMP seems to be closed or filtered------------------"${noco}
 	     exit 1
 	     ;;
 	 esac
